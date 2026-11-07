@@ -5,6 +5,7 @@ import { callLlm, isMockMode } from "./llm";
 import { logPipeline } from "./logger";
 import { loadPrompt, fill, stagePromptName } from "./prompts";
 import { maxRisk, ruleRisk, stepDownRisk, DENIAL_PATTERN, type RuleHit } from "./riskRules";
+import { styleGuard } from "./styleGuard";
 import {
   createSession,
   getSession,
@@ -313,14 +314,16 @@ async function runReview(
 
   try {
     const verdict = await reviewOnce(session, turnNo, input, candidate.reply, decision);
-    if (verdict.pass) return candidate;
+    // 第三道闸：L5 语义审查通过后，再做确定性规范检查（诊断词/禁语/清单/长度）
+    const merged = verdict.pass ? styleGuard(candidate.reply) : verdict;
+    if (merged.pass) return candidate;
 
     // 按 rewrite_hint 重写一次
     logPipeline({
       sessionId: session.id,
       turn: turnNo,
       stage: "rewrite",
-      detail: { reason: verdict.reason, hint: verdict.rewrite_hint },
+      detail: { reason: merged.reason, hint: merged.rewrite_hint },
     });
     try {
       const rewritten = await runMainOnce(
@@ -328,11 +331,12 @@ async function runReview(
         turnNo,
         input,
         decision.stage,
-        verdict.rewrite_hint,
+        merged.rewrite_hint,
         candidate.reply,
       );
       const verdict2 = await reviewOnce(session, turnNo, input, rewritten, decision);
-      if (verdict2.pass) return { reply: rewritten, cards: candidate.cards };
+      const merged2 = verdict2.pass ? styleGuard(rewritten) : verdict2;
+      if (merged2.pass) return { reply: rewritten, cards: candidate.cards };
     } catch {
       /* 重写通道失败，走兜底 */
     }
