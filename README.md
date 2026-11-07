@@ -27,6 +27,19 @@ npm run dev   # http://localhost:3000
 > 本机若没有全局 Node：便携版在 `C:\Users\34065\tools\node-dl\node-v22.23.4-win-x64`，
 > 把该目录加入 PATH 即可（Git Bash：`export PATH="/c/Users/34065/tools/node-dl/node-v22.23.4-win-x64:$PATH"`）。
 
+## 在线部署（ZCode Sites）
+
+线上预览：mock 模式长驻容器实例，内存会话在实例存活期间保留（约 2 小时 TTL 不变）。
+
+```bash
+# 重新部署（stage 已配置好，见 .zcode-site/stage/）
+node "C:\Users\34065\.zcode\cli\plugins\cache\zcode-plugins-official\zcode-site\0.4.2\scripts\zcode-site.mjs" deploy .zcode-site/stage
+```
+
+stage 构成：`.next/`（无 cache）+ `public/` + `prompts/` + package.json/lock +
+linux-x64 生产 node_modules（`npm install --omit=dev --os=linux --cpu=x64 --libc=glibc`，
+已移除 `next start` 不加载的 @next/swc-* 二进制）+ `start.sh`（`next start -H 0.0.0.0 -p 3000`）。
+
 ## 环境变量
 
 见 `.env.example`。`LLM_API_KEY` 留空即 mock 模式；

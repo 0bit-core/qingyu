@@ -42,3 +42,6 @@ next-env.d.ts
 
 # env template should be committed
 !.env.example
+
+# zcode-site deploy stage
+.zcode-site/
