@@ -7,8 +7,8 @@ import { logPipeline, type LlmPurpose } from "./logger";
 //   只体现在 base_url + model 组合上。
 // - 调用失败 / 超时 → throw，由 pipeline 降级为人工审定兜底，不报错给用户。
 
-const MAIN_TIMEOUT_MS = 20_000;
-const SMALL_TIMEOUT_MS = 8_000;
+const MAIN_TIMEOUT_MS = 45_000;
+const SMALL_TIMEOUT_MS = 20_000;
 
 export class LlmError extends Error {}
 
