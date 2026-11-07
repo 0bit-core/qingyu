@@ -176,6 +176,7 @@ async function runMainOnce(
   stage: Stage,
   rewriteHint?: string,
   previousCandidate?: string,
+  cardHint?: string,
 ): Promise<string> {
   const system = fill(
     [
@@ -194,6 +195,9 @@ async function runMainOnce(
       `你上一版的回复：${previousCandidate}`,
       `重写方向：${rewriteHint}`,
     );
+  }
+  if (cardHint) {
+    parts.push(`本轮的配套动作卡是《${cardHint}》，回复里承接它即可，不要再提出别的动作。`);
   }
   return callLlm<string>({
     purpose: rewriteHint ? "rewrite" : "main",
@@ -258,8 +262,7 @@ async function runMain(
   }
 
   try {
-    const reply = await runMainOnce(session, turnNo, input, decision.stage);
-    // 稳定化阶段：动作卡由 AI 按情境生成（mock/失败 → 静态库）
+    // 稳定化阶段先出卡，再让主生成承接同一张卡（保证「一次只给一个动作」）
     if (decision.stage === "stabilize") {
       const gen = await generateActionCard({
         sessionId: session.id,
@@ -269,8 +272,19 @@ async function runMain(
         recentTurns: historyText(session),
         summary: JSON.stringify(session.userStateSummary),
       });
+      const reply = await runMainOnce(
+        session,
+        turnNo,
+        input,
+        decision.stage,
+        undefined,
+        undefined,
+        gen ? `${gen.card.title}：${gen.card.body}` : undefined,
+      );
       if (gen) return { reply, cards: [{ type: "action", list: [gen.card], index: 0 }] };
+      return { reply, cards: stageCards(decision.stage) };
     }
+    const reply = await runMainOnce(session, turnNo, input, decision.stage);
     return { reply, cards: stageCards(decision.stage) };
   } catch {
     return { reply: generalFallback, cards: [], fallback: true };

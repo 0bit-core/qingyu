@@ -1,4 +1,5 @@
 import { callLlm, isMockMode } from "./llm";
+import { logPipeline } from "./logger";
 import { fill, loadPrompt } from "./prompts";
 import type { Battery, MicroAction } from "./types";
 
@@ -66,7 +67,13 @@ export async function generateActionCard(opts: {
     });
     const gen = cardGuard(raw);
     if (!gen) {
-      // 不打错——guard 拒绝是正常路径，降级静态库
+      // guard 拒绝是正常路径（降级静态库），但记录原因便于调优提示词
+      logPipeline({
+        sessionId: opts.sessionId,
+        turn: opts.turn,
+        stage: "card",
+        detail: { rejected: true, raw: JSON.stringify(raw).slice(0, 220) },
+      });
       return null;
     }
     return gen;
