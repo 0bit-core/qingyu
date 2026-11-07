@@ -18,12 +18,14 @@ export default async function ResourcesPage({
   const list = resources.filter((r) => r.region === active);
 
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-5 pb-12">
-      <header className="pt-6">
+    <main className="mx-auto w-full max-w-md flex-1 px-5 pb-12 md:max-w-2xl">
+      <header className="pt-6 md:pt-8">
         <Link href="/" className="text-base font-semibold tracking-tight">
           轻屿
         </Link>
-        <h1 className="mt-6 text-xl font-semibold">需要再多一点支持的时候</h1>
+        <h1 className="mt-6 text-xl font-semibold md:text-2xl">
+          需要再多一点支持的时候
+        </h1>
         <p className="mt-1.5 text-[15px] text-ink-soft">
           都记在这儿了，需要时再看，不看也没关系。
         </p>
@@ -46,9 +48,9 @@ export default async function ResourcesPage({
         ))}
       </nav>
 
-      <ul className="mt-4 flex flex-col gap-3">
+      <ul className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
         {active === "overseas" && (
-          <li>
+          <li className="md:col-span-2">
             <CardShell>
               <h2 className="text-[15px] font-medium text-ink-soft">
                 {overseasFallback.title}
@@ -61,7 +63,7 @@ export default async function ResourcesPage({
         )}
 
         {list.length === 0 && (
-          <li>
+          <li className="md:col-span-2">
             <CardShell>
               <p className="text-[15px] leading-relaxed">
                 这个地区的资源还在整理中。紧急情况请直接拨打当地急救电话。

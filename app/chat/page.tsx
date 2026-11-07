@@ -195,15 +195,17 @@ function Chat() {
 
   return (
     <div className="flex h-dvh flex-col">
-      <header className="flex items-center justify-between border-b border-line bg-paper/95 px-4 py-2.5 backdrop-blur">
-        <Link href="/" className="text-base font-semibold tracking-tight">
-          轻屿
-        </Link>
-        <ExitButton />
+      <header className="border-b border-line bg-paper/95 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-2xl items-center justify-between px-4 py-2.5 md:max-w-3xl">
+          <Link href="/" className="text-base font-semibold tracking-tight">
+            轻屿
+          </Link>
+          <ExitButton />
+        </div>
       </header>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
-        <div className="mx-auto flex max-w-md flex-col gap-3">
+        <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 md:max-w-3xl">
           {items.map((item) => {
             if (item.kind === "banner") return <SafetyBanner key={item.id} />;
             if (item.kind === "card") {
@@ -248,14 +250,14 @@ function Chat() {
             return item.from === "bot" ? (
               <p
                 key={item.id}
-                className="fade-in max-w-[85%] rounded-2xl rounded-bl-md border border-line bg-card px-4 py-2.5 text-[15px] leading-relaxed whitespace-pre-line"
+                className="fade-in max-w-[85%] rounded-2xl rounded-bl-md border border-line bg-card px-4 py-2.5 text-[15px] leading-relaxed whitespace-pre-line md:max-w-[70%]"
               >
                 {item.text}
               </p>
             ) : (
               <p
                 key={item.id}
-                className="fade-in ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-sage px-4 py-2.5 text-[15px] leading-relaxed"
+                className="fade-in ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-sage px-4 py-2.5 text-[15px] leading-relaxed md:max-w-[70%]"
               >
                 {item.text}
               </p>
@@ -273,7 +275,7 @@ function Chat() {
         onSubmit={handleSend}
         className="pb-safe border-t border-line bg-card px-3 pt-2.5"
       >
-        <div className="mx-auto mb-2.5 flex max-w-md items-center gap-2">
+        <div className="mx-auto mb-2.5 flex w-full max-w-2xl items-center gap-2 px-0 md:max-w-3xl">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -281,7 +283,7 @@ function Chat() {
             placeholder="想说什么都行，不说也行"
             enterKeyHint="send"
             disabled={busy}
-            className="min-w-0 flex-1 rounded-full border border-line bg-paper px-4 py-2.5 text-[15px] outline-none transition placeholder:text-ink-soft focus:border-sage disabled:opacity-60"
+            className="min-w-0 flex-1 rounded-full border border-line bg-paper px-4 py-2.5 text-[15px] outline-none transition placeholder:text-ink-soft focus:border-sage disabled:opacity-60 md:px-5"
           />
           <button
             type="submit"

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
+import DesktopNav from "@/components/DesktopNav";
 
 export const metadata: Metadata = {
   title: {
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="zh-CN" className="h-full">
       <body className="flex min-h-dvh flex-col">
+        <DesktopNav />
         <div className="flex flex-1 flex-col">{children}</div>
         <BottomNav />
       </body>

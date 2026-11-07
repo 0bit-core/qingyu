@@ -12,13 +12,13 @@ const tabs = [
 
 export default function BottomNav() {
   const pathname = usePathname();
-  // 对话页底部是输入框，导航不出现
+  // 对话页由输入框占据底部，导航退出；桌面端用顶部导航（DesktopNav）
   if (pathname.startsWith("/chat")) return null;
 
   return (
     <nav
       aria-label="页面导航"
-      className="pb-safe sticky bottom-0 border-t border-line bg-paper/95 backdrop-blur"
+      className="pb-safe sticky bottom-0 border-t border-line bg-paper/95 backdrop-blur md:hidden"
     >
       <ul className="mx-auto flex w-full max-w-md">
         {tabs.map(({ href, label, icon: Icon }) => {

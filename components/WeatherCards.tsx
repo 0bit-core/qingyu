@@ -67,7 +67,7 @@ export default function WeatherCards({
   onSkip?: () => void;
 }) {
   return (
-    <div className="mt-3 grid grid-cols-2 gap-2.5">
+    <div className="mt-3 grid grid-cols-2 gap-2.5 md:grid-cols-3">
       {weathers.map((w) => {
         const active = selected === w.id;
         return (

@@ -20,8 +20,8 @@ export default function QuietPage() {
   const words = quietWords[idx];
 
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-5 pb-10">
-      <header className="pt-6">
+    <main className="mx-auto w-full max-w-md flex-1 px-5 pb-10 md:max-w-2xl">
+      <header className="pt-6 md:pt-8">
         <Link href="/" className="text-base font-semibold tracking-tight">
           轻屿
         </Link>
@@ -30,7 +30,7 @@ export default function QuietPage() {
       <h1 className="sr-only">静一静</h1>
 
       <CardShell className="mt-6">
-        <p key={words.id} className="fade-in text-[17px] leading-loose">
+        <p key={words.id} className="fade-in text-[17px] leading-loose md:text-lg">
           {words.text}
         </p>
         <button
@@ -43,7 +43,7 @@ export default function QuietPage() {
       </CardShell>
 
       <div className="my-9 flex justify-center" aria-hidden="true">
-        <svg viewBox="0 0 220 90" className="w-56">
+        <svg viewBox="0 0 220 90" className="w-56 md:w-72">
           <circle cx="176" cy="22" r="13" fill="#e9b44c" opacity="0.85" />
           <path d="M20 68Q110 12 200 68Z" fill="#4f7a6b" opacity="0.9" />
           <path
@@ -59,7 +59,7 @@ export default function QuietPage() {
       <CardShell>
         <p className="text-sm leading-relaxed text-ink-soft">{breathCaption}</p>
         <div className="grid place-items-center py-9">
-          <div className="animate-breathe h-24 w-24 rounded-full border-2 border-sage/70 bg-sage-soft" />
+          <div className="animate-breathe h-24 w-24 rounded-full border-2 border-sage/70 bg-sage-soft md:h-28 md:w-28" />
         </div>
         {done && (
           <div className="fade-in text-center">

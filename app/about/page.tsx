@@ -23,8 +23,8 @@ const privacyList = [
 ];
 export default function AboutPage() {
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-5 pb-12">
-      <header className="pt-6">
+    <main className="mx-auto w-full max-w-md flex-1 px-5 pb-12 md:max-w-2xl">
+      <header className="pt-6 md:pt-8">
         <Link href="/" className="text-base font-semibold tracking-tight">
           轻屿
         </Link>
