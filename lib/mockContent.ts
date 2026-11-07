@@ -104,6 +104,88 @@ export const freeReplies = [
   "先不解决什么。你是想说说，还是想有人陪着待一会儿？",
 ];
 
+// ---------------- 主题回应库（mock 模式：让回应指向用户说的具体内容） ----------------
+// 语气对齐 L1_style 的好回法：短、具体、不模板、选项式、不施压。
+// 命中主题用对应回应（多句轮换），未命中才落到 freeReplies。
+
+type TopicReply = { id: string; re: RegExp; replies: string[] };
+
+export const topicReplies: TopicReply[] = [
+  {
+    id: "greeting",
+    re: /^(嗯+|哦+|噢+|在吗|在么|嗨|哈喽|hello|hi|你好)[。，!！.~\s]*$/i,
+    replies: [
+      "在的。想说啥都行，不说也没关系。",
+      "嗯，我在。今天过得怎么样？一句话也行。",
+    ],
+  },
+  {
+    id: "work",
+    re: /上班|工作|加班|老板|领导|同事|辞职|离职|开会|工资|项目|上学|上课|作业|考试|复习|论文|导师|成绩|升学/,
+    replies: [
+      "那点事最磨人的是它天天都在。今天哪一段最难熬？不想细说也行。",
+      "光是坐在那儿就已经费电了。想聊就聊点，不想聊就待着。",
+      "这些事一件件压下来，谁都会喘不过气。先说最沉的那件？",
+    ],
+  },
+  {
+    id: "sleep",
+    re: /睡不着|失眠|凌晨|早醒|做梦|熬夜|睡不好|浅眠/,
+    replies: [
+      "夜里醒着的时候，时间过得特别慢。这几天都没睡好？",
+      "睡不好，白天就更容易沉。先不解决它，昨晚几点躺下的？",
+    ],
+  },
+  {
+    id: "relationship",
+    re: /分手|吵架|冷战|对象|男朋友|女朋友|老公|老婆|相亲|家人|爸妈|父母|家里|朋友|疏远|绝交|被(误解|误会)/,
+    replies: [
+      "跟人有关的事，最累的不是吵，是心里过不去。愿意的话，说说那个人。",
+      "关系上的事没有标准答案。你是想聊聊，还是就想吐吐槽？",
+    ],
+  },
+  {
+    id: "lonely",
+    re: /一个人|孤独|孤单|没人(陪|聊|管)|没人说话|没朋友/,
+    replies: [
+      "一个人撑着的时候，连累都显得没资格说。这儿能说，随便说。",
+      "没人说话的那种空，是真实的。我在，你慢慢说。",
+    ],
+  },
+  {
+    id: "future",
+    re: /不知道(怎么办|咋办)|迷茫|没方向|没盼头|以后|将来|毕业|三十|年龄焦虑|来不及/,
+    replies: [
+      "看不见方向的时候，连选什么都费劲。不急着找答案，先说说卡在哪儿了。",
+      "以后的事以后再说。这会儿你最想聊的是哪一段？",
+    ],
+  },
+  {
+    id: "body",
+    re: /头疼|头痛|胃疼|胃不舒服|心口|发抖|没胃口|吃不下|胸闷|喘不上|浑身(疼|酸)/,
+    replies: [
+      "身上难受，情绪也会跟着往下掉。别硬扛——看过医生吗？",
+      "先顾身体。想说说哪儿不舒服吗？说完记得喝口水。",
+    ],
+  },
+  {
+    id: "wronged",
+    re: /委屈|冤枉|被骂|被说|被怪|不甘心|憋屈/,
+    replies: [
+      "委屈这种事，说出来不一定能解决，但憋着更沉。说给我听听。",
+      "不是你太敏感。愿意的话，从最开始那件事说起。",
+    ],
+  },
+  {
+    id: "chitchat",
+    re: /天气|出太阳|下雨|下雪|哈哈|嘿嘿|吃了吗|搞笑|好笑|段子|猫|狗(?!使)|小视频/,
+    replies: [
+      "是挺不错的。你那边出太阳了？",
+      "哈哈，行。今天有啥小乐子，说来听听。",
+    ],
+  },
+];
+
 // ---------------- mock 分类器（L2 的本地替身） ----------------
 
 export function mockRouter(input: string, session: SessionState): RouterOutput {
@@ -117,7 +199,7 @@ export function mockRouter(input: string, session: SessionState): RouterOutput {
   } else if (resistance) {
     // 抗拒时不推进阶段（brief L2 规则 3）
     stage_signal = session.stage === "safety" ? "safety" : "explore";
-  } else if (/吵|停不下来|静不下来|心慌|睡不着|脑子里一直/.test(text)) {
+  } else if (/心里(很|好|太|特别)?吵|脑子(里|子)?(很|好|太|一直)?吵|停不下来|静不下来|心慌|睡不着|脑子里一直/.test(text)) {
     stage_signal = "stabilize";
   } else if (/提不起劲|什么都不想干|不想干|没力气|干不动|累瘫/.test(text)) {
     stage_signal = "action";
@@ -128,9 +210,17 @@ export function mockRouter(input: string, session: SessionState): RouterOutput {
     stage_signal = "insight";
   } else if (/先这样(吧)?|就到(这儿|这里)|拜拜|我(走|下线)了|想睡了/.test(text)) {
     stage_signal = "close";
-  } else if (session.stage === "stabilize" && text.length > 12) {
-    // 稳定化后回应变长 → 回探索
-    stage_signal = "explore";
+  } else {
+    // 沿用当前阶段；但倾诉类主题出现时回到探索（用户换了话题/在展开讲）
+    const topic = topicReplies.find(
+      (t) => !["greeting", "chitchat"].includes(t.id) && t.re.test(text),
+    );
+    if (topic) {
+      stage_signal = "explore";
+    } else if (session.stage === "stabilize" && text.length > 12) {
+      // 稳定化后回应变长/语气平稳 → 回探索
+      stage_signal = "explore";
+    }
   }
 
   return {
@@ -177,7 +267,13 @@ export function mockMainReply(opts: {
     case "close":
       return { reply: "今天到这儿就挺好，随时可以回来。", cards: [] };
     default: {
-      // explore：接话 + 轮换
+      // explore：先按主题接住（指向具体内容），未命中再落到通用接话
+      const topic = topicReplies.find((t) => t.re.test(input));
+      if (topic) {
+        const reply = topic.replies[session.mock.freeReplyIdx % topic.replies.length];
+        session.mock.freeReplyIdx += 1;
+        return { reply, cards: [] };
+      }
       const reply = freeReplies[session.mock.freeReplyIdx % freeReplies.length];
       session.mock.freeReplyIdx += 1;
       return { reply, cards: [] };
