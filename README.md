@@ -27,12 +27,14 @@ npm run dev   # http://localhost:3000
 > 本机若没有全局 Node：便携版在 `C:\Users\34065\tools\node-dl\node-v22.23.4-win-x64`，
 > 把该目录加入 PATH 即可（Git Bash：`export PATH="/c/Users/34065/tools/node-dl/node-v22.23.4-win-x64:$PATH"`）。
 
-## 在线部署
+## 部署状态
 
-- **Render（真实模型）**：仓库含 `render.yaml` 蓝图。Render Dashboard → New → Blueprint
-  → 选择本仓库 → 在表单填入 LLM_* 环境变量（值加密存储）→ Apply。免费层 15 分钟无访问
-  会休眠（冷启动约 1 分钟）；每次 git push 自动重新部署。
-- **ZCode Sites（mock 预览）**：stage 已配置好，见 `.zcode-site/stage/`。
+- **线上预览（mock 模式）**：https://qingyu-1cln.zai-ai.site （ZCode Sites，长驻容器，可分享）
+- **本地（真模型）**：`npm run dev` + `.env.local`（DeepSeek），`localhost:3000`
+- 升级路径（已调研，随时可走）：
+  - 腾讯 EdgeOne Pages：免费/国内快，需 edge runtime 改造（prompts 内联 + 会话 KV）
+  - Vercel + 自定义域名：域名 ≈¥20/年，需 Redis 会话存储（`.vercel.app` 域名已被污染不可用）
+  - Render：免费层需绑国际信用卡验证
 
 stage 构成：`.next/`（无 cache）+ `public/` + `prompts/` + package.json/lock +
 linux-x64 生产 node_modules（`npm install --omit=dev --os=linux --cpu=x64 --libc=glibc`，
