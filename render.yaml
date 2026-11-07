@@ -1,0 +1,28 @@
+# Render 部署蓝图（免费层）。
+# 用户在 Render Dashboard → New → Blueprint 选择本仓库后，
+# 标记 sync: false 的变量会要求在表单中填写（值加密存储，不进代码库）。
+
+services:
+  - type: web
+    name: qingyu
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm ci && npm run build
+    startCommand: npx next start -H 0.0.0.0 -p $PORT
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22.11.0"
+      - key: LLM_PROVIDER
+        sync: false
+      - key: LLM_API_KEY
+        sync: false
+      - key: LLM_BASE_URL
+        sync: false
+      - key: LLM_MODEL_MAIN
+        sync: false
+      - key: LLM_MODEL_SMALL
+        sync: false
+      - key: APP_LOCALE
+        value: zh-CN

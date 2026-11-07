@@ -27,14 +27,12 @@ npm run dev   # http://localhost:3000
 > 本机若没有全局 Node：便携版在 `C:\Users\34065\tools\node-dl\node-v22.23.4-win-x64`，
 > 把该目录加入 PATH 即可（Git Bash：`export PATH="/c/Users/34065/tools/node-dl/node-v22.23.4-win-x64:$PATH"`）。
 
-## 在线部署（ZCode Sites）
+## 在线部署
 
-线上预览：mock 模式长驻容器实例，内存会话在实例存活期间保留（约 2 小时 TTL 不变）。
-
-```bash
-# 重新部署（stage 已配置好，见 .zcode-site/stage/）
-node "C:\Users\34065\.zcode\cli\plugins\cache\zcode-plugins-official\zcode-site\0.4.2\scripts\zcode-site.mjs" deploy .zcode-site/stage
-```
+- **Render（真实模型）**：仓库含 `render.yaml` 蓝图。Render Dashboard → New → Blueprint
+  → 选择本仓库 → 在表单填入 LLM_* 环境变量（值加密存储）→ Apply。免费层 15 分钟无访问
+  会休眠（冷启动约 1 分钟）；每次 git push 自动重新部署。
+- **ZCode Sites（mock 预览）**：stage 已配置好，见 `.zcode-site/stage/`。
 
 stage 构成：`.next/`（无 cache）+ `public/` + `prompts/` + package.json/lock +
 linux-x64 生产 node_modules（`npm install --omit=dev --os=linux --cpu=x64 --libc=glibc`，
