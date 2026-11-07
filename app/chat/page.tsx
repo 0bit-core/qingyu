@@ -12,6 +12,7 @@ import ExitButton from "@/components/ExitButton";
 import SafetyBanner from "@/components/SafetyBanner";
 import SwipeCard from "@/components/SwipeCard";
 import WeatherCards from "@/components/WeatherCards";
+import { CatAvatar } from "@/components/mascots";
 import type {
   Battery,
   Branch,
@@ -248,12 +249,12 @@ function Chat() {
               );
             }
             return item.from === "bot" ? (
-              <p
-                key={item.id}
-                className="fade-in max-w-[85%] rounded-2xl rounded-bl-md border border-line bg-card px-4 py-2.5 text-[15px] leading-relaxed whitespace-pre-line md:max-w-[70%]"
-              >
-                {item.text}
-              </p>
+              <div key={item.id} className="fade-in flex items-end gap-2">
+                <CatAvatar className="h-7 w-7 shrink-0 md:h-8 md:w-8" />
+                <p className="max-w-[85%] rounded-2xl rounded-bl-md border border-line bg-card px-4 py-2.5 text-[15px] leading-relaxed whitespace-pre-line md:max-w-[70%]">
+                  {item.text}
+                </p>
+              </div>
             ) : (
               <p
                 key={item.id}

@@ -46,6 +46,20 @@ export default function QuietPage() {
         <svg viewBox="0 0 220 90" className="w-56 md:w-72">
           <circle cx="176" cy="22" r="13" fill="#e9b44c" opacity="0.85" />
           <path d="M20 68Q110 12 200 68Z" fill="#4f7a6b" opacity="0.9" />
+          {/* 岛上的猫 */}
+          <path d="M58 45 Q58 30 76 30 Q94 30 94 45 Z" fill="#3f6558" />
+          <circle cx="65" cy="29" r="9" fill="#3f6558" />
+          <path d="M58 22 L56 12 L67 18 Z" fill="#3f6558" />
+          <path d="M72 22 L74 12 L63 18 Z" fill="#3f6558" />
+          <circle cx="61" cy="30" r="1.5" fill="#f6f5f0" />
+          <circle cx="69" cy="30" r="1.5" fill="#f6f5f0" />
+          <path
+            d="M93 42 Q106 38 102 26"
+            stroke="#3f6558"
+            strokeWidth="4"
+            strokeLinecap="round"
+            fill="none"
+          />
           <path
             d="M4 78c9-4.5 18-4.5 27 0s18 4.5 27 0 18-4.5 27 0 18 4.5 27 0 18-4.5 27 0 18 4.5 27 0 18-4.5 27 0"
             fill="none"
