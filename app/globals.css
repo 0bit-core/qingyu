@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+/*
+ * 轻屿设计基调：暖纸底、低饱和海绿色系、大圆角、留白。
+ * 原则：不施压、不刺眼；正文对比度 ≥ 4.5:1。
+ */
+@theme {
+  --color-paper: #f6f5f0;
+  --color-card: #ffffff;
+  --color-ink: #33403e;
+  --color-ink-soft: #5f6d6a;
+  --color-ink-faint: #97a09c;
+  --color-line: #e6e3da;
+  --color-sage: #4f7a6b;
+  --color-sage-deep: #3f6558;
+  --color-sage-soft: #e7efeb;
+  --color-sun: #e9b44c;
+  --color-storm: #41506b;
+  --color-storm-soft: #e9edf5;
+
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "PingFang SC", "HarmonyOS Sans SC",
+    "MiSans", "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-sage);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--color-sage-soft);
+}
+
+/* 全面屏底部安全区。只用在没有其他 pb 工具类的元素上（此规则会覆盖工具类）。 */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 入场轻浮现 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.fade-in {
+  animation: fade-in 0.35s ease both;
+}
+
+/* /quiet 呼吸圆点：7s 一轮 */
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(0.55);
+    opacity: 0.7;
+  }
+  45%,
+  55% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.animate-breathe {
+  animation: breathe 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-in {
+    animation: none;
+  }
+  .animate-breathe {
+    animation: none;
+    transform: scale(0.8);
+  }
+}
