@@ -142,6 +142,8 @@ export type SessionState = {
     /** 最近一次表情反馈（1–5；粗粒度，mock 摘要的 mood_trend 用） */
     lastMood: 1 | 2 | 3 | 4 | 5 | null;
   };
+  /** 最近推过的动作卡标题（最多 5 条；AI 生成与 mock 挑选都用于去重） */
+  recentActions: string[];
 };
 
 /** POST /api/chat 响应 */

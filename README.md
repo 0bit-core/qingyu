@@ -66,7 +66,7 @@ app/            五个页面 + api/{session,chat,resources,summary} + not-found
 lib/            pipeline.ts（五步链路） llm.ts（封装+mock） prompts.ts（读取组装）
                 riskRules.ts（双通道规则） fallback.ts（人工审定兜底）
                 session.ts store.ts（内存+TTL2h） logger.ts mockContent.ts types.ts
-prompts/        L0–L5 提示词资产（运行时原样读取，不在代码中改写）
+prompts/        L0–L6 提示词资产（L6_card 为微动作卡生成器；运行时原样读取）
 config/         resources.ts（按地区） emergency.ts（紧急提示语，待人工审定） quiet.ts
 components/     EntryCards WeatherCards ActionCard BatteryPicker EmojiFeedback
                 SwipeCard CardShell ExitButton BottomNav SafetyBanner ClearSessionButton
@@ -80,12 +80,13 @@ scripts/        llm-stub.mjs（OpenAI 兼容联调 stub） test-risk-rules.mjs
      → ② 读取状态摘要
      → ③ 阶段决策（≥elevated → L3_safety 替换式接管；overload → 稳定化；resistance → 不推进）
      → ④ 主生成（L0+L1+阶段提示词）
-     → ⑤ 输出审查（不过 → 按 rewrite_hint 重写一次 → 仍不过 → 人工审定兜底）
-     → ⑥ 摘要更新 → 写回会话
+     → ⑤ 卡片生成（按需：稳定化/选电量/换一张 → L6_card 小模型生成，cardGuard 校验，失败降级静态库）
+     → ⑥ 输出审查（L5 + styleGuard 确定性规范闸；不过 → 重写一次 → 仍不过 → 人工审定兜底）
+     → ⑦ 摘要更新 → 写回会话
 卡片交互（选天气/电量/换一张/不想做/做完/表情）走固定话术，不经 LLM
 ```
 
-日志：每段一行 JSON，`grep "[qingyu]"` 即可逐段观测。
+日志：每段一行 JSON，`grep "[qingyu]"` 即可逐段观测（含 card 段）。
 
 ## 安全红线（摘要，全文见 brief §7）
 

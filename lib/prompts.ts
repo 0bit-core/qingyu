@@ -16,7 +16,8 @@ export type PromptName =
   | "L3_close"
   | "L3_safety"
   | "L4_summary"
-  | "L5_review";
+  | "L5_review"
+  | "L6_card";
 
 const cache = new Map<string, string>();
 

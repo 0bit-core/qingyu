@@ -1,7 +1,7 @@
 // 管线日志：每段调用一行 JSON，grep「[qingyu]」即可逐段观测
 // 四类 LLM 调用分别标记为 risk / main / review / summary（brief §8 验收项）。
 
-export type LlmPurpose = "risk" | "main" | "rewrite" | "review" | "summary";
+export type LlmPurpose = "risk" | "main" | "rewrite" | "review" | "card" | "summary";
 
 export type PipelineStage =
   | LlmPurpose

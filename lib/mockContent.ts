@@ -58,6 +58,36 @@ export const stabilizeActions: MicroAction[] = [
   { id: "s4", title: "吹灭一根很远的蜡烛", body: "用鼻子吸气，用嘴慢慢地、长长地吹。吹两次。" },
 ];
 
+// 情境池（mock 模式按输入挑选，让卡片随处境变化）
+export const indoorSenseActions: MicroAction[] = [
+  { id: "si1", title: "看看窗外最远的屋顶", body: "找到能看到的最远一点，看三十秒。" },
+  { id: "si2", title: "摸一下桌面的温度", body: "手掌放上去，感受它是凉是温。" },
+  { id: "si3", title: "听周围最持续的声音", body: "不用闭眼，找到那个一直响着的，听几秒。" },
+  { id: "si4", title: "慢慢转一转脖子", body: "转到左边停一下，再转右边。各一次。" },
+];
+
+export const homeSenseActions: MicroAction[] = [
+  { id: "sh1", title: "感受脚踩在地面", body: "双脚放平，感受脚底接触的那一小块。" },
+  { id: "sh2", title: "数一下房间里的光", body: "不开灯，数数现在有几处光源。" },
+  { id: "sh3", title: "摸摸身边布料", body: "指尖慢慢蹭一下被子或沙发，感受纹理。" },
+  { id: "sh4", title: "喝一口温水", body: "小口就好，注意温度滑过喉咙。" },
+];
+
+/** mock 稳定化卡挑选：按输入情境选池，避开最近用过的 */
+export function pickMockStabilize(input: string, session: SessionState): {
+  list: MicroAction[];
+  index: number;
+} {
+  const pool = /办公室|工位|上班|开会|教室|上课/.test(input)
+    ? indoorSenseActions
+    : /躺|床上|被窝|半夜|凌晨|睡前/.test(input)
+      ? homeSenseActions
+      : stabilizeActions;
+  const fresh = pool.filter((a) => !session.recentActions.includes(a.title));
+  const usable = fresh.length > 0 ? fresh : pool;
+  return { list: pool, index: pool.indexOf(usable[0]) };
+}
+
 export const batteryActions: Record<Battery, MicroAction[]> = {
   1: [
     { id: "a1-1", title: "把窗帘拉开一条缝", body: "让光进来一点就行，不用全拉开。" },
@@ -254,10 +284,11 @@ export function mockMainReply(opts: {
 
   switch (stage) {
     case "stabilize": {
-      const index = session.mock.lastCard?.type === "action" ? session.mock.lastCard.index : 0;
+      // mock：按情境挑池 + 避开最近用过的
+      const picked = pickMockStabilize(input, session);
       return {
         reply: "先做个 20 秒的小东西，不着急。",
-        cards: [{ type: "action", list: stabilizeActions, index }],
+        cards: [{ type: "action", list: picked.list, index: picked.index }],
       };
     }
     case "action":
@@ -323,12 +354,17 @@ export function cardActionReply(
       return { reply: weatherReplies[action.value], cards: [], stage: "explore" };
     case "weather_skip":
       return { reply: weatherSkipReply, cards: [], stage: null };
-    case "battery":
+    case "battery": {
+      // mock：避开最近用过的（AI 模式由生成器负责）
+      const full = batteryActions[action.level];
+      const fresh = full.filter((a) => !session.recentActions.includes(a.title));
+      const list = fresh.length > 0 ? fresh : full;
       return {
         reply: batteryLeads[action.level],
-        cards: [{ type: "action", list: batteryActions[action.level], index: 0 }],
+        cards: [{ type: "action", list, index: 0 }],
         stage: "action",
       };
+    }
     case "shuffle":
       if (last?.type === "action") {
         const index = (last.index + 1) % last.list.length;

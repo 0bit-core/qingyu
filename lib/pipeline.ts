@@ -2,6 +2,7 @@ import { emergencyMessage } from "@/config/emergency";
 import { localeResourcesText } from "@/config/resources";
 import { generalFallback, safetyFallback } from "./fallback";
 import { callLlm, isMockMode } from "./llm";
+import { generateActionCard } from "./cardGen";
 import { logPipeline } from "./logger";
 import { loadPrompt, fill, stagePromptName } from "./prompts";
 import { maxRisk, ruleRisk, stepDownRisk, DENIAL_PATTERN, type RuleHit } from "./riskRules";
@@ -49,6 +50,20 @@ function historyText(session: SessionState, k: number = CONTEXT_TURNS): string {
     .slice(-k * 2)
     .map((t) => `${t.role === "user" ? "用户" : "轻屿"}：${t.content}`)
     .join("\n");
+}
+
+/** 记录最近推过的动作卡标题（AI 生成与 mock 挑选共用去重依据） */
+function trackActionTitle(session: SessionState, cards: CardPayload[]): void {
+  const first = cards[0];
+  if (first?.type === "action") {
+    const title = first.list[first.index]?.title;
+    if (title) {
+      session.recentActions = [
+        title,
+        ...session.recentActions.filter((t) => t !== title),
+      ].slice(0, 5);
+    }
+  }
 }
 
 function promptVars(session: SessionState) {
@@ -244,6 +259,18 @@ async function runMain(
 
   try {
     const reply = await runMainOnce(session, turnNo, input, decision.stage);
+    // 稳定化阶段：动作卡由 AI 按情境生成（mock/失败 → 静态库）
+    if (decision.stage === "stabilize") {
+      const gen = await generateActionCard({
+        sessionId: session.id,
+        turn: turnNo,
+        goal: "sense",
+        recentActions: session.recentActions,
+        recentTurns: historyText(session),
+        summary: JSON.stringify(session.userStateSummary),
+      });
+      if (gen) return { reply, cards: [{ type: "action", list: [gen.card], index: 0 }] };
+    }
     return { reply, cards: stageCards(decision.stage) };
   } catch {
     return { reply: generalFallback, cards: [], fallback: true };
@@ -422,7 +449,31 @@ export async function handleChatTurn(params: {
     if (params.cardAction.type === "mood") {
       session.mock.lastMood = params.cardAction.score;
     }
-    const out = cardActionReply(params.cardAction, session);
+    let out = cardActionReply(params.cardAction, session);
+    // 真实模式：需要动作卡时由 AI 生成（guard 拒绝或失败 → 静默降级静态库）
+    if (
+      !isMockMode() &&
+      (params.cardAction.type === "battery" ||
+        (params.cardAction.type === "shuffle" && out.cards[0]?.type === "action"))
+    ) {
+      const goal =
+        params.cardAction.type === "battery" || session.stage === "action"
+          ? ("move" as const)
+          : ("sense" as const);
+      const gen = await generateActionCard({
+        sessionId: session.id,
+        turn: turnNo,
+        goal,
+        battery: params.cardAction.type === "battery" ? params.cardAction.level : undefined,
+        recentActions: session.recentActions,
+        recentTurns: historyText(session),
+        summary: JSON.stringify(session.userStateSummary),
+      });
+      if (gen) {
+        out = { ...out, cards: [{ type: "action", list: [gen.card], index: 0 }] };
+      }
+    }
+    trackActionTitle(session, out.cards);
     session.turns.push({ role: "user", content: describeCardAction(params.cardAction) });
     session.turns.push({ role: "assistant", content: out.reply });
     if (out.stage) session.stage = out.stage;
@@ -507,6 +558,7 @@ export async function handleChatTurn(params: {
   session.ruminationRounds = router.rumination_rounds;
   session.userStateSummary = nextSummary;
   session.mock.lastCard = reviewed.cards[0] ?? null;
+  trackActionTitle(session, reviewed.cards);
   await saveSession(session);
 
   logPipeline({

@@ -40,6 +40,7 @@ export async function createSession(branch: Branch | null): Promise<SessionState
     ruminationRounds: 0,
     userStateSummary: emptySummary(),
     mock: { freeReplyIdx: 0, lastCard: null, lastMood: null },
+    recentActions: [],
   };
   await getStore().set(id, state);
   return state;

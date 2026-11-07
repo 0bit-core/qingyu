@@ -5,6 +5,8 @@
 //   normal      默认：router/main/review/summary 全部正常
 //   rewrite     主生成首版违规（依赖诱导+否定感受），审查不放行 → 触发重写
 //   risk        路由分类器返回 elevated → 验证安全分支替换
+//   card        路由返回 stabilize，卡片生成器返回合法卡 → 验证 AI 卡片
+//   badcard     卡片生成器返回违规卡（跑步）→ 验证 cardGuard 拦截并降级静态库
 //   always_fail 全部请求 500 → 验证降级兜底
 //   slow        主生成延迟 25s → 触发 20s 超时 → 验证降级兜底
 //
@@ -24,7 +26,8 @@ const routerJson = (risk) =>
     emotion_tags: ["低落"],
     intensity: 3,
     topic: "无明确主题",
-    stage_signal: "explore",
+    stage_signal:
+      scenario === "card" || scenario === "badcard" ? "stabilize" : "explore",
     resistance: false,
     overload: false,
     rumination_rounds: 0,
@@ -79,6 +82,23 @@ const server = http.createServer((req, res) => {
     // —— 小模型：状态摘要器 ——
     if (system.includes("状态摘要器")) {
       reply(summaryJson);
+      return;
+    }
+    // —— 小模型：微动作卡片生成器 ——
+    if (system.includes("微动作卡片生成器")) {
+      reply(
+        scenario === "badcard"
+          ? JSON.stringify({
+              title: "出门跑步五公里",
+              body: "跑起来，出一身汗，别停。坚持住。",
+              kind: "move",
+            })
+          : JSON.stringify({
+              title: "看看窗外最远的屋顶",
+              body: "找到能看到的最远一点，看三十秒。",
+              kind: "sense",
+            }),
+      );
       return;
     }
     // —— 小模型：输出审查器（真的按内容审查违规词） ——
